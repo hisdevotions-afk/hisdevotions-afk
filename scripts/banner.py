@@ -1,6 +1,6 @@
 """Capa do perfil: Criação de Adão desenhada só com '0'.
 
-Adão (esquerda) vira braço robótico: contorno poligonal, grade uniforme, juntas.
+Adão (esquerda) vira o braço robótico de ref/robot.jpg: grade cheia, metal sombreado por tom.
 Deus (direita) fica orgânico: densidade de '0' segue a luz (bayer).
 """
 import sys
@@ -30,34 +30,32 @@ lum = rgb @ [0.299, 0.587, 0.114]
 lum = (lum - lum[skin].min()) / (np.ptp(lum[skin]) + 1e-6)
 
 split = 140       # entre os dedos
-# Adão robótico: desenhado em geometria na pose do original (coordenadas em células)
-robot = np.zeros((ROWS, COLS), np.uint8)
-joints = np.zeros((ROWS, COLS), np.uint8)
-P = lambda pts: np.array(pts, np.int32)
-cv2.fillPoly(robot, [P([(0, 44), (84, 33), (88, 46), (0, 63)])], 1)          # antebraço
-cv2.fillPoly(robot, [P([(97, 30), (111, 29), (113, 42), (99, 45)])], 1)      # palma
-fingers = [  # (pontos, espessura)
-    ([(112, 31), (121, 30), (130, 31), (137, 33)], 3),                     # indicador, esticado
-    ([(113, 36), (120, 38), (125, 43), (124, 48)], 2),
-    ([(112, 40), (118, 44), (121, 49), (119, 53)], 2),
-    ([(110, 43), (114, 48), (115, 52)], 2),
-    ([(99, 44), (104, 50), (111, 52)], 2),                                  # polegar
-]
-for f, w in fingers:
-    for a, b in zip(f, f[1:]):
-        cv2.line(robot, a, b, 1, w)
-    for j in f[1:-1]:
-        joints[j[1], j[0]] = 1
-cv2.circle(joints, (92, 40), 6, 1, 1)                                       # punho
-cv2.circle(robot, (92, 40), 6, 1, -1)
+# Adão robótico: braço da referência (ref/robot.jpg), recortado por GrabCut em ref/robot-mask.png.
+# Grade cheia e regular; o metal é sombreado por tom, não por densidade.
+rm = cv2.imread(f"{S}/ref/robot-mask.png", 0) > 0
+rl = cv2.cvtColor(cv2.imread(f"{S}/ref/robot.jpg"), cv2.COLOR_BGR2GRAY).astype(float) / 255
+ys, xs = np.nonzero(rm)
+tip_x = xs.max(); tip_y = int(np.median(ys[xs > tip_x - 6]))
+scale = 0.31                                         # células por pixel da referência
+xoff = 137 - int(tip_x * scale)                      # ponta do dedo na coluna 137
+gh, gw = int(rm.shape[0] * scale), int(rm.shape[1] * scale)
+m_small = cv2.resize(rm.astype(np.float32), (gw, gh), interpolation=cv2.INTER_AREA)
+l_small = cv2.resize(rl, (gw, gh), interpolation=cv2.INTER_AREA)
+off = 42 - int(tip_y * scale)                        # ponta logo abaixo do dedo de Deus
+robot = np.zeros((ROWS, COLS), np.uint8); rlum = np.zeros((ROWS, COLS))
+for y in range(ROWS):
+    sy = y - off
+    if 0 <= sy < gh:
+        for x in range(COLS):
+            sx = x - xoff
+            if sx < 0:
+                sx %= 6                              # estende o braço até a borda repetindo o metal
+            if sx < gw:
+                robot[y, x] = m_small[sy, sx] > 0.5
+                rlum[y, x] = l_small[sy, sx]
+lo_, hi_ = np.percentile(rlum[robot > 0], [5, 95])
+rlum = np.clip((rlum - lo_) / (hi_ - lo_ + 1e-6), 0, 1)
 edge = robot - cv2.erode(robot, np.ones((3, 3), np.uint8))
-seam = np.zeros_like(robot)
-for x in range(8, 84, 13):                                                  # placas do antebraço
-    seam[:, x] = 1
-seam[:, 105] = 1
-inner = cv2.erode(robot, np.ones((3, 3), np.uint8))
-seam &= inner
-edge |= joints & robot
 
 # Deus orgânico: bayer sobre a luminância
 bayer = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16
@@ -72,14 +70,19 @@ for theme, c in THEMES.items():
     for y in range(ROWS):
         for x in range(COLS):
             if robot[y, x]:
+                v = rlum[y, x]
                 if edge[y, x]:
                     put(x, y, c["hi"], BOLD)
-                elif not seam[y, x]:
+                elif v > 0.62:
+                    put(x, y, c["hi"])
+                elif v > 0.3:
                     put(x, y, c["mid"])
+                elif v > 0.1:
+                    put(x, y, c["lo"])     # abaixo disso fica vazio: frestas entre as peças
             elif god_on[y, x]:
                 put(x, y, c["hi"] if lum[y, x] > 0.55 else c["mid"])
     # janela de terminal feita de 0, entre as mãos
-    x0, y0, x1, y1 = 112, 1, 168, 16
+    x0, y0, x1, y1 = 144, 1, 198, 15
     for x in range(x0, x1 + 1):
         put(x, y0, c["hi"], BOLD); put(x, y0 + 3, c["hi"], BOLD); put(x, y1, c["hi"], BOLD)
     for y in range(y0, y1 + 1):
