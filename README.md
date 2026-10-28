@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-    <img src="assets/banner-light.png" alt="Dithered pixel art of The Creation of Adam with Adam's arm as a robotic arm, and a terminal window above the hands" width="100%">
+    <img src="assets/banner-light.png" alt="Stippled Creation of Adam: a robotic arm reaches toward the hand of God through a terminal window" width="100%">
   </picture>
 </p>
 
