@@ -26,7 +26,7 @@
 
 **Roberto** here, an AI engineer based in São Paulo.
 
-I'm also the founder of **[Cicada](https://www.linkedin.com/company/cicada-ai/)**, where we build AI operating systems for companies: one system that replaces the CRM, the spreadsheets and the manual steps of an operation, with AI built into the workflow from the first lead to delivery.
+I'm also the founder of **[Cicada](https://www.linkedin.com/company/cicada-ai/)**, where we build AI operating systems for companies on top of the systems they already use. That means internal applications, integrations and data pipelines, LLM agents working inside operational workflows, and dashboards that help teams decide and plan. We start from the bottlenecks between people, processes, data and technology, and the goal is an operation that can be measured and audited.
 
 I build agents and LLM systems that real people use. That includes LangChain agents on WhatsApp with memory per conversation, MCP servers that give agents access to databases, repositories and documentation, and flows where a person approves sensitive actions or takes over when the agent does not know the answer.
 
