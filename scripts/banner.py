@@ -51,22 +51,25 @@ xoff = god_tip_x - 6 - int(tip_x * scale)     # ponta robótica 6 pontos antes d
 # altura: o topo do braço sob a janela (colunas 123 a 186) fica logo abaixo dela (linha 32)
 under = rm[:, int((123 - xoff) / scale):]
 yoff = 32 - int(np.nonzero(under.any(axis=1))[0].min() * scale)
+# Antebraço da referência (x < WRIST px) esticado ao longo do eixo até a borda esquerda;
+# a mão (x >= WRIST) fica na escala original.
+WRIST = 165
+xh = xoff + int(WRIST * scale)                 # coluna onde começa a mão
+def area(a, size):
+    return cv2.resize(a.astype(np.float32), size, interpolation=cv2.INTER_AREA)
+fa_m = area(rm[:, :WRIST], (xh, gh)) > 0.5
+fa_l = area(rl[:, :WRIST], (xh, gh))
+fa_e = area(edges[:, :WRIST], (xh, gh)) > 0.4
 robot = np.zeros((h, w), bool); rlum = np.zeros((h, w)); line = np.zeros((h, w), bool)
 for y in range(h):
     sy = y - yoff
     if not 0 <= sy < gh:
         continue
     for x in range(SPLIT):
-        sx = x - xoff
-        if sx < 0:
-            # antes da borda da referência: tubo liso com o perfil de luz da coluna 3, juntas a cada 22 pontos
-            robot[y, x] = m_small[sy, 3]
-            rlum[y, x] = l_small[sy, 3]
-            line[y, x] = m_small[sy, 3] and (xoff - x) % 22 == 0
-        elif sx < gw:
-            robot[y, x] = m_small[sy, sx]
-            rlum[y, x] = l_small[sy, sx]
-            line[y, x] = e_small[sy, sx]
+        if x < xh:
+            robot[y, x], rlum[y, x], line[y, x] = fa_m[sy, x], fa_l[sy, x], fa_e[sy, x]
+        elif (sx := x - xoff) < gw:
+            robot[y, x], rlum[y, x], line[y, x] = m_small[sy, sx], l_small[sy, sx], e_small[sy, sx]
 lo_, hi_ = np.percentile(rlum[robot], [5, 95])
 rlum = np.clip((rlum - lo_) / (hi_ - lo_ + 1e-6), 0, 1)
 outline = robot & ~cv2.erode(robot.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
