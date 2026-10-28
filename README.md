@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-    <img src="assets/banner-light.png" alt="Pixel art of two reaching hands with a terminal window between them" width="100%">
+    <img src="assets/banner-light.png" alt="The Creation of Adam drawn entirely with zeros, Adam's hand rebuilt as a robotic hand, with a terminal window between the fingers" width="100%">
   </picture>
 </p>
 
