@@ -26,6 +26,8 @@
 
 **Roberto** here, an AI engineer based in São Paulo.
 
+I'm also the founder of **[Cicada](https://www.linkedin.com/company/cicada-ai/)**, where we build AI operating systems for companies: one system that replaces the CRM, the spreadsheets and the manual steps of an operation, with AI built into the workflow from the first lead to delivery.
+
 I build agents and LLM systems that real people use. That includes LangChain agents on WhatsApp with memory per conversation, MCP servers that give agents access to databases, repositories and documentation, and flows where a person approves sensitive actions or takes over when the agent does not know the answer.
 
 I run several LLM providers side by side with automatic fallback, and I compare models against each other, prompt injection tests included. Day to day I write **Python (FastAPI, async PostgreSQL, Celery)** and **TypeScript**, and ship with **Docker, CI/CD and automated tests**.
