@@ -1,6 +1,6 @@
-"""Capa do perfil: Criação de Adão desenhada só com '0'.
+"""Capa do perfil: Criação de Adão em pontos (dither).
 
-Adão (esquerda) vira o braço robótico de ref/robot.jpg: grade cheia, metal sombreado por tom.
+Adão (esquerda) vira o braço robótico de ref/robot.jpg.
 Deus (direita) fica orgânico: densidade de '0' segue a luz (bayer).
 """
 import sys
@@ -66,19 +66,12 @@ god_on = god & (lum * 0.7 + 0.42 > th)
 for theme, c in THEMES.items():
     im = Image.new("RGBA", (COLS * CELL, ROWS * CELL), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    put = lambda x, y, col, f=FONT, ch="0": d.text((x * CELL + 1, y * CELL - 2), ch, fill=col, font=f)
+    put = lambda x, y, col, f=None: d.rectangle((x * CELL, y * CELL, x * CELL + CELL - 1, y * CELL + CELL - 1), fill=c["hi"])  # ponto
     for y in range(ROWS):
         for x in range(COLS):
             if robot[y, x]:
-                v = rlum[y, x]
-                if edge[y, x]:
-                    put(x, y, c["hi"], BOLD)
-                elif v > 0.62:
+                if edge[y, x] or rlum[y, x] * 0.8 + 0.3 > th[y, x]:
                     put(x, y, c["hi"])
-                elif v > 0.3:
-                    put(x, y, c["mid"])
-                elif v > 0.1:
-                    put(x, y, c["lo"])     # abaixo disso fica vazio: frestas entre as peças
             elif god_on[y, x]:
                 put(x, y, c["hi"] if lum[y, x] > 0.55 else c["mid"])
     # janela de terminal feita de 0, entre as mãos
