@@ -61,7 +61,7 @@ edge = robot - cv2.erode(robot, np.ones((3, 3), np.uint8))
 bayer = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16
 th = np.tile(bayer, (ROWS // 4 + 1, COLS // 4 + 1))[:ROWS, :COLS]
 god = skin.copy(); god[:, :split] = False
-god_on = god & (lum * 0.45 + 0.6 > th)
+god_on = god & (lum * 0.6 + 0.48 > th)
 
 for theme, c in THEMES.items():
     im = Image.new("RGBA", (COLS * CELL, ROWS * CELL), (0, 0, 0, 0))
@@ -70,7 +70,7 @@ for theme, c in THEMES.items():
     for y in range(ROWS):
         for x in range(COLS):
             if robot[y, x]:
-                if edge[y, x] or rlum[y, x] * 0.45 + 0.6 > th[y, x]:
+                if edge[y, x] or rlum[y, x] * 0.6 + 0.45 > th[y, x]:
                     put(x, y, c["hi"])
             elif god_on[y, x]:
                 put(x, y, c["hi"] if lum[y, x] > 0.55 else c["mid"])
