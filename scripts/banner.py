@@ -34,18 +34,24 @@ god_tip_y = int(np.median(np.nonzero(mask[:, god_tip_x:god_tip_x + 3].any(axis=1
 
 # --- braço robótico no lugar de Adão, com o mesmo dither ---
 rm = cv2.imread(f"{S}/ref/robot-mask.png", 0) > 0
-rl = cv2.cvtColor(cv2.imread(f"{S}/ref/robot.jpg"), cv2.COLOR_BGR2GRAY).astype(float) / 255
+gray = cv2.cvtColor(cv2.imread(f"{S}/ref/robot.jpg"), cv2.COLOR_BGR2GRAY)
+gray = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(gray)     # contraste local do cromado
+rl = gray.astype(float) / 255
+# arestas entre as peças (falanges, punho, placas), só dentro do braço
+edges = cv2.Canny(cv2.GaussianBlur(gray, (5, 5), 0), 110, 220) > 0
+edges &= cv2.erode(rm.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
 ys, xs = np.nonzero(rm)
 tip_x = xs.max(); tip_y = int(np.median(ys[xs > tip_x - 6]))
 scale = 0.22
 gh, gw = int(rm.shape[0] * scale), int(rm.shape[1] * scale)
 m_small = cv2.resize(rm.astype(np.float32), (gw, gh), interpolation=cv2.INTER_AREA) > 0.5
 l_small = cv2.resize(rl, (gw, gh), interpolation=cv2.INTER_AREA)
+e_small = cv2.resize(edges.astype(np.float32), (gw, gh), interpolation=cv2.INTER_AREA) > 0.4
 xoff = god_tip_x - 6 - int(tip_x * scale)     # ponta robótica 6 pontos antes do dedo de Deus
 # altura: o topo do braço sob a janela (colunas 123 a 186) fica logo abaixo dela (linha 32)
 under = rm[:, int((123 - xoff) / scale):]
 yoff = 32 - int(np.nonzero(under.any(axis=1))[0].min() * scale)
-robot = np.zeros((h, w), bool); rlum = np.zeros((h, w))
+robot = np.zeros((h, w), bool); rlum = np.zeros((h, w)); line = np.zeros((h, w), bool)
 for y in range(h):
     sy = y - yoff
     if not 0 <= sy < gh:
@@ -53,13 +59,19 @@ for y in range(h):
     for x in range(SPLIT):
         sx = x - xoff
         if sx < 0:
-            sx %= 6                            # estende o braço até a borda repetindo o metal
-        if sx < gw:
+            # antes da borda da referência: tubo liso com o perfil de luz da coluna 3, juntas a cada 22 pontos
+            robot[y, x] = m_small[sy, 3]
+            rlum[y, x] = l_small[sy, 3]
+            line[y, x] = m_small[sy, 3] and (xoff - x) % 22 == 0
+        elif sx < gw:
             robot[y, x] = m_small[sy, sx]
             rlum[y, x] = l_small[sy, sx]
+            line[y, x] = e_small[sy, sx]
 lo_, hi_ = np.percentile(rlum[robot], [5, 95])
 rlum = np.clip((rlum - lo_) / (hi_ - lo_ + 1e-6), 0, 1)
-mask |= robot & (rlum * 0.85 + 0.25 > th)
+outline = robot & ~cv2.erode(robot.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+fill = robot & (rlum * 0.8 + 0.33 > th) & ~line          # aresta vira fresta escura dentro do metal
+mask |= fill | outline
 
 # --- render: igual à versão inicial ---
 for theme, c in INK.items():
