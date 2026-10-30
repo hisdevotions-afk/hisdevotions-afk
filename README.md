@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.jpg" alt="White line drawing of Atlas holding up a golden-ratio arc on a black background" width="360">
+  <img src="assets/banner.svg" alt="White line drawing of Atlas holding up a golden-ratio arc, flanked by golden rectangles whose spirals draw themselves in gold" width="100%">
 </p>
 
 <h1 align="center">Hi 👋, I'm Roberto</h1>
