@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="White line drawing of Atlas holding up a golden-ratio arc, flanked by golden rectangles whose spirals draw themselves in gold" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
+    <img src="assets/banner-light.png" alt="Pixel art of two reaching hands with a terminal window between them" width="100%">
+  </picture>
 </p>
 
 <h1 align="center">Hi 👋, I'm Roberto</h1>
