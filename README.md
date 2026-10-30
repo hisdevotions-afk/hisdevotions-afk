@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-    <img src="assets/banner-light.png" alt="Stippled Creation of Adam: a robotic arm reaches toward the hand of God through a terminal window" width="100%">
-  </picture>
+  <img src="assets/banner.jpg" alt="White line drawing of Atlas holding up a golden-ratio arc on a black background" width="360">
 </p>
 
 <h1 align="center">Hi 👋, I'm Roberto</h1>
