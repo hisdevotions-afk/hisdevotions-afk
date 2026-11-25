@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-<h1 align="center">Hi 👋, I'm Roberto</h1>
+<h1 align="center">Hi, I'm Roberto</h1>
 
 <h3 align="center">AI Engineer</h3>
 
